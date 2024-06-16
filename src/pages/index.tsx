@@ -6,15 +6,26 @@ import { useState } from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export interface Transaction {
-  
+  "actualFee": string, // number
+  "blockNumber": number,
+  "classAlias": any,
+  "classHash": any,
+  "contractAddress": string,
+  "contractAlias": any,
+  "hash": string,
+  "index": number,
+  "l1VerificationHash": string,
+  "status": "Accepted on L1",
+  "timestamp": number,
+  "type": "INVOKE"
 }
 
 const getTransactions = async ({ address }: { address: string; }) => {
   try {
     const url = `https://api.voyager.online/beta/txns?to=${address}&rejected=false&ps=10&p=1`;
-    const response = await axios.get(url, { params: { address }, headers: {
+    const response = await axios.get(url, { headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.VOYAGER_API_KEY}`
+      "x-api-key": `${process.env.NEXT_PUBLIC_VOYAGER_API_KEY}`
     } });
 
     return response.data;
@@ -57,6 +68,22 @@ export default function Home() {
         </div>
       </div>
       <p>Wallet: {address}</p>
+      <div>
+        {isLoading && <p>Loading...</p>}
+        {data && (
+          <div>
+            {data.items.map((txn: Transaction) => (
+              <div key={txn.hash} className="flex flex-col gap-2">
+                <p>Transaction: {txn.hash}</p>
+                <p>Contract: {txn.contractAddress}</p>
+                <p>Block: {txn.blockNumber}</p>
+                <p>Fee: {txn.actualFee}</p>
+                <p>Timestamp: {txn.timestamp}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
